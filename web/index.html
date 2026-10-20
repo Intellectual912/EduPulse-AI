@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduPulse AI — Early-Warning Academic Risk Platform & Socratic Coach</title>
+  <meta name="description" content="EduPulse AI: Real-time academic risk prediction and Socratic coaching platform engineered from the Open University Learning Analytics Dataset (OULAD).">
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- App Container -->
+  <div id="app-root">
+    
+    <!-- Top Navigation Bar -->
+    <header class="navbar" id="main-navbar">
+      <div class="nav-left">
+        <div class="brand-logo">
+          <div class="pulse-ring"></div>
+          <span class="logo-icon">⚡</span>
+          <span class="brand-title">EduPulse <span class="highlight">AI</span></span>
+        </div>
+        <div class="server-badge" id="server-status-badge">
+          <span class="status-dot"></span>
+          <span class="status-text">Dev Server Live &bull; Port 8080</span>
+        </div>
+      </div>
+
+      <nav class="nav-links" id="main-nav-tabs" aria-label="Main Navigation">
+        <button class="nav-tab active" id="tab-btn-overview" data-tab="overview">
+          <span class="tab-icon">📊</span> Overview
+        </button>
+        <button class="nav-tab" id="tab-btn-students" data-tab="students">
+          <span class="tab-icon">👥</span> Student Cohort
+        </button>
+        <button class="nav-tab" id="tab-btn-simulator" data-tab="simulator">
+          <span class="tab-icon">⚡</span> Risk Simulator
+        </button>
+        <button class="nav-tab" id="tab-btn-cutoff" data-tab="cutoff">
+          <span class="tab-icon">⏱️</span> Cutoff Window
+        </button>
+        <button class="nav-tab" id="tab-btn-features" data-tab="features">
+          <span class="tab-icon">📑</span> Feature Catalog
+        </button>
+        <button class="nav-tab" id="tab-btn-audit" data-tab="audit">
+          <span class="tab-icon">🔬</span> Pipeline Audit
+        </button>
+      </nav>
+
+      <div class="nav-right">
+        <div class="nav-search-wrapper">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="global-student-search" placeholder="Quick find student ID..." autocomplete="off">
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-content" id="main-content-view">
+      
+      <!-- TAB 1: EXECUTIVE OVERVIEW -->
+      <section class="tab-panel active" id="panel-overview">
+        <!-- Hero Section -->
+        <div class="hero-banner">
+          <div class="hero-text">
+            <span class="hero-eyebrow">Milestone 1 Benchmark &bull; Cutoff Day 28</span>
+            <h1 class="hero-heading">Early-Warning Student Academic Risk Classifier</h1>
+            <p class="hero-desc">
+              Predicting students heading for academic difficulty at <strong>course day 28</strong> (~10% into the term), 
+              leaving ~90% (240+ days) of the semester for proactive, targeted Socratic intervention before course completion.
+            </p>
+          </div>
+          <div class="hero-badges">
+            <div class="stat-pill">
+              <span class="stat-label">Observation Window</span>
+              <span class="stat-value">Days −∞ … 28</span>
+            </div>
+            <div class="stat-pill highlight">
+              <span class="stat-label">Intervention Lead Time</span>
+              <span class="stat-value">~240 Days Remaining</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metric KPI Cards -->
+        <div class="kpi-grid">
+          <div class="kpi-card" id="kpi-total-enrolments">
+            <div class="kpi-header">
+              <span class="kpi-title">Monitored Enrolments</span>
+              <span class="kpi-icon">🎓</span>
+            </div>
+            <div class="kpi-number" id="val-total-enrolments">27,522</div>
+            <div class="kpi-subtext">Post-cutoff valid cohort (5,055 pre-day 28 withdrawals excluded)</div>
+          </div>
+
+          <div class="kpi-card danger" id="kpi-at-risk">
+            <div class="kpi-header">
+              <span class="kpi-title">At-Risk Prevalence</span>
+              <span class="kpi-icon">⚠️</span>
+            </div>
+            <div class="kpi-number" id="val-at-risk-rate">44.1%</div>
+            <div class="kpi-subtext" id="val-at-risk-count">12,143 students (Fail: 7,037 + Withdrawn: 5,106)</div>
+          </div>
+
+          <div class="kpi-card success" id="kpi-on-track">
+            <div class="kpi-header">
+              <span class="kpi-title">On-Track (Passing)</span>
+              <span class="kpi-icon">✅</span>
+            </div>
+            <div class="kpi-number" id="val-on-track-rate">55.9%</div>
+            <div class="kpi-subtext" id="val-on-track-count">15,379 students (Pass: 12,356 + Distinction: 3,023)</div>
+          </div>
+
+          <div class="kpi-card accent" id="kpi-features-count">
+            <div class="kpi-header">
+              <span class="kpi-title">Leakage-Free Features</span>
+              <span class="kpi-icon">🛡️</span>
+            </div>
+            <div class="kpi-number">63</div>
+            <div class="kpi-subtext">Across 4 families: Demographics, Timing, Assessment, VLE</div>
+          </div>
+        </div>
+
+        <!-- Risk vs Safe Comparison Barometer -->
+        <div class="glass-card section-card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Early Behavioral Footprint: Safe vs. At-Risk Students</h2>
+              <p class="card-subtitle">Empirical differences recorded strictly on or before course day 28</p>
+            </div>
+          </div>
+          <div class="comparative-grid" id="comparative-metrics-grid">
+            <!-- Injected dynamically by JS -->
+          </div>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="charts-grid">
+          <div class="glass-card chart-card">
+            <div class="card-header">
+              <h3 class="card-title">Final Course Outcomes Distribution</h3>
+              <span class="badge">OULAD Ground Truth</span>
+            </div>
+            <div class="chart-container" style="height: 280px;">
+              <canvas id="chart-outcomes"></canvas>
+            </div>
+          </div>
+
+          <div class="glass-card chart-card">
+            <div class="card-header">
+              <h3 class="card-title">Risk Prevalence by Course Module</h3>
+              <span class="badge">7 STEM & Social Modules</span>
+            </div>
+            <div class="chart-container" style="height: 280px;">
+              <canvas id="chart-modules"></canvas>
+            </div>
+          </div>
+
+          <div class="glass-card chart-card">
+            <div class="card-header">
+              <h3 class="card-title">Risk Rate by Educational Background</h3>
+              <span class="badge">Socioeconomic Stratification</span>
+            </div>
+            <div class="chart-container" style="height: 280px;">
+              <canvas id="chart-education"></canvas>
+            </div>
+          </div>
+
+          <div class="glass-card chart-card">
+            <div class="card-header">
+              <h3 class="card-title">VLE Platform Activity vs. Risk</h3>
+              <span class="badge">Day 28 Cutoff</span>
+            </div>
+            <div class="chart-container" style="height: 280px;">
+              <canvas id="chart-engagement"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: STUDENT RISK COHORT -->
+      <section class="tab-panel" id="panel-students">
+        <div class="panel-header">
+          <div>
+            <h2 class="section-heading">Student Risk Cohort Explorer</h2>
+            <p class="section-desc">Inspect, filter, and drill into individual student profiles across all 27,522 enrolments.</p>
+          </div>
+          <div class="panel-actions">
+            <button class="btn btn-secondary" id="btn-export-cohort">📥 Export View (CSV)</button>
+          </div>
+        </div>
+
+        <!-- Filters Strip -->
+        <div class="glass-card filter-strip" id="student-filters-toolbar">
+          <div class="filter-group">
+            <label for="filter-search-id">Student ID</label>
+            <input type="text" id="filter-search-id" placeholder="Filter by ID (e.g. 11391)...">
+          </div>
+
+          <div class="filter-group">
+            <label for="filter-module">Module</label>
+            <select id="filter-module">
+              <option value="all">All Modules</option>
+              <option value="AAA">AAA (Humanities)</option>
+              <option value="BBB">BBB (Social Science)</option>
+              <option value="CCC">CCC (STEM)</option>
+              <option value="DDD">DDD (STEM)</option>
+              <option value="EEE">EEE (STEM)</option>
+              <option value="FFF">FFF (STEM)</option>
+              <option value="GGG">GGG (Social Science)</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="filter-presentation">Presentation</label>
+            <select id="filter-presentation">
+              <option value="all">All Presentations</option>
+              <option value="2013J">2013J (October 2013)</option>
+              <option value="2014J">2014J (October 2014)</option>
+              <option value="2013B">2013B (February 2013)</option>
+              <option value="2014B">2014B (February 2014)</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="filter-risk">Risk Status</label>
+            <select id="filter-risk">
+              <option value="all">All Cohorts</option>
+              <option value="at_risk">⚠️ At-Risk Only (Fail / Withdrawn)</option>
+              <option value="safe">✅ On-Track Only (Pass / Distinction)</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="filter-sort">Sort By</label>
+            <select id="filter-sort">
+              <option value="id_student">Student ID</option>
+              <option value="target_at_risk">Risk Status (High to Low)</option>
+              <option value="mean_score">Day 28 Mean Score</option>
+              <option value="vle_clicks_total">Total VLE Clicks</option>
+              <option value="vle_days_since_last_activity">Days Inactive</option>
+              <option value="n_late_submissions">Late Submissions</option>
+            </select>
+          </div>
+
+          <div class="filter-group filter-actions">
+            <button class="btn btn-primary" id="btn-apply-filters">Filter</button>
+            <button class="btn btn-outline" id="btn-reset-filters">Reset</button>
+          </div>
+        </div>
+
+        <!-- Data Table Card -->
+        <div class="glass-card table-card">
+          <div class="table-responsive">
+            <table class="data-table" id="students-table">
+              <thead>
+                <tr>
+                  <th>Student ID</th>
+                  <th>Module</th>
+                  <th>Presentation</th>
+                  <th>Demographics</th>
+                  <th>Day 28 Score</th>
+                  <th>VLE Clicks</th>
+                  <th>Active Days</th>
+                  <th>Days Inactive</th>
+                  <th>Late Subs</th>
+                  <th>Risk Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="students-table-body">
+                <tr>
+                  <td colspan="11" class="loading-cell">Loading student records...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Bar -->
+          <div class="pagination-bar" id="students-pagination">
+            <div class="pagination-info" id="pagination-info-text">
+              Showing 1–25 of 27,522 students
+            </div>
+            <div class="pagination-controls">
+              <button class="btn-page" id="btn-prev-page" disabled>&larr; Prev</button>
+              <span class="page-current" id="page-indicator">Page 1 of 1101</span>
+              <button class="btn-page" id="btn-next-page">Next &rarr;</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: WHAT-IF RISK SIMULATOR -->
+      <section class="tab-panel" id="panel-simulator">
+        <div class="panel-header">
+          <div>
+            <h2 class="section-heading">Interactive What-If Early Intervention Simulator</h2>
+            <p class="section-desc">
+              Adjust early behavioral indicators up to day 28 to observe real-time risk trajectory changes 
+              and generate targeted Socratic coaching strategies.
+            </p>
+          </div>
+        </div>
+
+        <div class="simulator-layout">
+          <!-- Controls Column -->
+          <div class="glass-card sim-controls-card">
+            <h3 class="card-title">Early Warning Levers (Day ≤ 28)</h3>
+            <p class="card-subtitle">Test how engagement & coursework timeliness shift risk probabilities</p>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="sim-clicks">Total VLE Platform Clicks</label>
+                <span class="slider-val" id="val-sim-clicks">350</span>
+              </div>
+              <input type="range" id="sim-clicks" min="0" max="1500" step="10" value="350">
+              <span class="slider-hint">Cohort Avg: ~390 clicks. &lt;100 clicks drastically raises risk.</span>
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="sim-active-days">Active Study Days (out of 28)</label>
+                <span class="slider-val" id="val-sim-active-days">12</span>
+              </div>
+              <input type="range" id="sim-active-days" min="0" max="28" step="1" value="12">
+              <span class="slider-hint">Frequency of login days is a key habit persistence indicator.</span>
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="sim-days-inactive">Days Since Last Activity</label>
+                <span class="slider-val" id="val-sim-days-inactive">2</span>
+              </div>
+              <input type="range" id="sim-days-inactive" min="0" max="28" step="1" value="2">
+              <span class="slider-hint">&gt;14 days indicates potential ghosting / withdrawal hazard.</span>
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="sim-score">First Assessment Score (0–100)</label>
+                <span class="slider-val" id="val-sim-score">68</span>
+              </div>
+              <input type="range" id="sim-score" min="0" max="100" step="1" value="68">
+              <span class="slider-hint">Pass threshold is 40. Scores &gt;75 provide strong protection.</span>
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="sim-submission-rate">Assessment Submission Rate</label>
+                <span class="slider-val" id="val-sim-submission-rate">100%</span>
+              </div>
+              <input type="range" id="sim-submission-rate" min="0" max="1" step="0.1" value="1.0">
+              <span class="slider-hint">Missing a due assessment before day 28 is the #1 single risk driver.</span>
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="sim-late-rate">Late Submission Frequency</label>
+                <span class="slider-val" id="val-sim-late-rate">0%</span>
+              </div>
+              <input type="range" id="sim-late-rate" min="0" max="1" step="0.2" value="0.0">
+              <span class="slider-hint">Turning in work past deadline indicates time management strain.</span>
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <label for="sim-prev-attempts">Previous Course Attempts</label>
+                <span class="slider-val" id="val-sim-prev-attempts">0</span>
+              </div>
+              <input type="range" id="sim-prev-attempts" min="0" max="4" step="1" value="0">
+              <span class="slider-hint">Repeat enrolments have statistically higher attrition rates.</span>
+            </div>
+          </div>
+
+          <!-- Result Gauge & Coach Column -->
+          <div class="sim-output-column">
+            <!-- Risk Gauge Card -->
+            <div class="glass-card sim-gauge-card">
+              <div class="card-header">
+                <h3 class="card-title">Predicted Risk Probability</h3>
+                <span class="badge" id="sim-tier-badge">Low Risk</span>
+              </div>
+
+              <div class="gauge-display">
+                <div class="gauge-circle" id="sim-gauge-circle">
+                  <div class="gauge-inner">
+                    <span class="gauge-percent" id="sim-risk-percent">28.4%</span>
+                    <span class="gauge-label">Risk Probability</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="sim-advice-box" id="sim-advice-box">
+                <h4 class="advice-heading">Advisory Assessment</h4>
+                <p class="advice-content" id="sim-advice-content">
+                  Student demonstrates strong platform presence and timely submission habits. Standard monitoring recommended.
+                </p>
+              </div>
+
+              <!-- Factor Impact Breakdown -->
+              <div class="sim-factors-list" id="sim-factors-list">
+                <!-- Dynamically rendered -->
+              </div>
+            </div>
+
+            <!-- Socratic Coaching Blueprint Card -->
+            <div class="glass-card sim-coach-card">
+              <div class="card-header">
+                <div class="coach-header-brand">
+                  <span class="coach-spark">✨</span>
+                  <h3 class="card-title">AI Socratic Coach Intervention</h3>
+                </div>
+                <span class="badge highlight">Milestone 3 Preview</span>
+              </div>
+
+              <div class="coach-body">
+                <div class="coach-field">
+                  <span class="coach-field-label">Intervention Persona Archetype:</span>
+                  <span class="coach-field-value" id="sim-coach-archetype">On-Track Consistent Learner</span>
+                </div>
+
+                <div class="coach-field">
+                  <span class="coach-field-label">Recommended Tutor Action:</span>
+                  <p class="coach-field-text" id="sim-coach-action">
+                    Validate positive learning cadence. Provide optional extension readings for advanced mastery.
+                  </p>
+                </div>
+
+                <div class="coach-prompt-box">
+                  <span class="prompt-label">Drafted Student Outreach Message:</span>
+                  <blockquote class="socratic-prompt" id="sim-coach-prompt">
+                    "You're off to a fantastic start! Your first assessment submission showed solid grasp of foundational principles. How did you find the self-assessment exercise in Unit 2?"
+                  </blockquote>
+                  <button class="btn btn-outline btn-sm copy-btn" id="btn-copy-sim-prompt">📋 Copy Message</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: CUTOFF DAY DIAGNOSTICS -->
+      <section class="tab-panel" id="panel-cutoff">
+        <div class="panel-header">
+          <div>
+            <h2 class="section-heading">Observation Window & Cutoff Diagnostics</h2>
+            <p class="section-desc">
+              Why <strong>Day 28</strong> is the scientifically justified sweet spot for early intervention.
+            </p>
+          </div>
+        </div>
+
+        <div class="glass-card cutoff-rationale-card">
+          <div class="rationale-header">
+            <span class="rationale-icon">💡</span>
+            <div>
+              <h3 class="rationale-title">The Fundamental Prediction Dilemma in Learning Analytics</h3>
+              <p class="rationale-text">
+                Predicting earlier (e.g. Day 14) maximizes the remaining semester for tutor coaching, but students have submitted virtually no coursework. 
+                Predicting later (e.g. Day 56) yields higher accuracy, but 25% of the course has already elapsed, making it harder to rescue failing students.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cutoff Table -->
+        <div class="glass-card table-card" style="margin-bottom: 24px;">
+          <div class="card-header">
+            <h3 class="card-title">Cutoff Diagnostics Matrix (`cutoff_diagnostics.csv`)</h3>
+            <span class="badge success">Empirically Verified</span>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table cutoff-table">
+              <thead>
+                <tr>
+                  <th>Cutoff Day</th>
+                  <th>Cohort Size</th>
+                  <th>Modules with Due Work</th>
+                  <th>Enrolments with ≥1 Grade</th>
+                  <th>Mean Graded Work</th>
+                  <th>VLE Clicks in Window</th>
+                  <th>Intervention Runway</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="cutoff-table-body">
+                <!-- Injected by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Cutoff Comparison Cards -->
+        <div class="cutoff-cards-grid" id="cutoff-cards-grid">
+          <!-- Injected by JS -->
+        </div>
+      </section>
+
+      <!-- TAB 5: FEATURE CATALOG -->
+      <section class="tab-panel" id="panel-features">
+        <div class="panel-header">
+          <div>
+            <h2 class="section-heading">Feature Catalog & Architecture</h2>
+            <p class="section-desc">
+              Authoritative dictionary of all 63 leakage-free predictors structured into 4 distinct families.
+            </p>
+          </div>
+          <div class="search-features-wrapper">
+            <input type="text" id="search-features-input" placeholder="Search feature name or family...">
+          </div>
+        </div>
+
+        <!-- Feature Families Summary Grid -->
+        <div class="feature-families-grid">
+          <div class="family-card" data-family="demographics">
+            <div class="family-icon">👤</div>
+            <div class="family-info">
+              <span class="family-name">Static Demographics</span>
+              <span class="family-count">9 Features</span>
+            </div>
+            <p class="family-desc">Fixed attributes known upon enrolment: gender, region, education, IMD deprivation band, age, disability.</p>
+          </div>
+
+          <div class="family-card" data-family="registration">
+            <div class="family-icon">📅</div>
+            <div class="family-info">
+              <span class="family-name">Registration Timing</span>
+              <span class="family-count">5 Features</span>
+            </div>
+            <p class="family-desc">Registration days before course start, late registrations after Day 0, elapsed tenure at cutoff.</p>
+          </div>
+
+          <div class="family-card" data-family="assessment">
+            <div class="family-icon">📝</div>
+            <div class="family-info">
+              <span class="family-name">Windowed Assessment</span>
+              <span class="family-count">22 Features</span>
+            </div>
+            <p class="family-desc">Due, submitted, graded, late rates, mean/weighted scores strictly due and submitted ≤ Day 28.</p>
+          </div>
+
+          <div class="family-card" data-family="vle">
+            <div class="family-icon">🖱️</div>
+            <div class="family-info">
+              <span class="family-name">VLE Engagement & Velocity</span>
+              <span class="family-count">22 Features</span>
+            </div>
+            <p class="family-desc">Total clicks, active days, click slopes, forum/content breakdown, 7-day velocity and pre-course clicks.</p>
+          </div>
+        </div>
+
+        <!-- Feature List Accordion / Grid -->
+        <div class="glass-card features-list-card">
+          <div class="card-header">
+            <h3 class="card-title">Predictor Manifest (`feature_manifest.json`)</h3>
+            <span class="badge" id="features-counter-badge">63 Predictors</span>
+          </div>
+          <div class="features-list-container" id="features-list-container">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 6: PIPELINE AUDIT & DATA QUALITY -->
+      <section class="tab-panel" id="panel-audit">
+        <div class="panel-header">
+          <div>
+            <h2 class="section-heading">Data Quality Report & Integrity Verification</h2>
+            <p class="section-desc">
+              All numbers computed from actual raw OULAD records. 0 leakage, 7/7 verification checks passed.
+            </p>
+          </div>
+        </div>
+
+        <!-- Leakage Prevention Pillars -->
+        <div class="leakage-pillars-grid">
+          <div class="pillar-card">
+            <div class="pillar-number">01</div>
+            <h4 class="pillar-title">Windowed Assessments</h4>
+            <p class="pillar-text">
+              Only assessments that were <strong>both due on/before Day 28</strong> AND <strong>submitted on/before Day 28</strong> are considered. No future exams or late grading leakage.
+            </p>
+          </div>
+
+          <div class="pillar-card">
+            <div class="pillar-number">02</div>
+            <h4 class="pillar-title">Exclusion Ledger</h4>
+            <p class="pillar-text">
+              <strong>5,055 students</strong> who withdrew before day 28 are excluded from training rather than used as a predictor. Their records are logged in <code>excluded_records.csv</code>.
+            </p>
+          </div>
+
+          <div class="pillar-card">
+            <div class="pillar-number">03</div>
+            <h4 class="pillar-title">Forbidden Target Guards</h4>
+            <p class="pillar-text">
+              <code>final_result</code> and <code>target_at_risk</code> are strictly shielded. <code>assert_no_leakage()</code> halts execution if any target column appears in features.
+            </p>
+          </div>
+
+          <div class="pillar-card">
+            <div class="pillar-number">04</div>
+            <h4 class="pillar-title">Invariant Verification</h4>
+            <p class="pillar-text">
+              <code>test_features_are_invariant_to_post_cutoff_data</code> proves that deleting all raw data after day 28 produces 100% byte-identical feature sets.
+            </p>
+          </div>
+        </div>
+
+        <!-- Generated Figures Gallery -->
+        <div class="glass-card figures-gallery-card">
+          <div class="card-header">
+            <h3 class="card-title">Pipeline Diagnostic Figures</h3>
+            <span class="badge success">Generated by `notebooks/data_exploration.ipynb`</span>
+          </div>
+
+          <div class="figures-grid">
+            <div class="figure-item">
+              <img src="/figures/04_outcomes.png" alt="OULAD Outcomes Distribution" loading="lazy">
+              <div class="figure-caption">Figure 04: Distribution of Final Outcomes (Pass, Fail, Withdrawn, Distinction)</div>
+            </div>
+
+            <div class="figure-item">
+              <img src="/figures/05_cutoff_tradeoff.png" alt="Cutoff Day Tradeoff" loading="lazy">
+              <div class="figure-caption">Figure 05: Predictive Window Tradeoff (Information Gain vs. Intervention Horizon)</div>
+            </div>
+
+            <div class="figure-item">
+              <img src="/figures/02_clicks_per_week.png" alt="VLE Activity Trends by Week" loading="lazy">
+              <div class="figure-caption">Figure 02: Mean VLE Clicks per Week across Course Timeline</div>
+            </div>
+
+            <div class="figure-item">
+              <img src="/figures/07_features_by_outcome.png" alt="Features Stratified by Outcome" loading="lazy">
+              <div class="figure-caption">Figure 07: Key Predictor Variations Across Passing vs Failing Cohorts</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Student Detail Modal / Drawer -->
+    <div class="modal-backdrop" id="student-modal-backdrop">
+      <div class="student-drawer" id="student-detail-drawer" role="dialog" aria-modal="true" aria-labelledby="modal-student-name">
+        <div class="drawer-header">
+          <div class="drawer-title-group">
+            <span class="drawer-eyebrow">Student Performance Profile</span>
+            <h2 class="drawer-title" id="modal-student-name">Student #11391</h2>
+            <div class="drawer-meta-tags" id="modal-meta-tags">
+              <!-- Module, Presentation, Risk Badge -->
+            </div>
+          </div>
+          <button class="drawer-close-btn" id="btn-close-modal" aria-label="Close dialog">&times;</button>
+        </div>
+
+        <div class="drawer-body" id="modal-drawer-body">
+          <!-- Dynamically injected student deep-dive details -->
+          <div class="loading-state">Loading student profile...</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

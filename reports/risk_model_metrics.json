@@ -1,0 +1,64 @@
+{
+  "model": "XGBoostClassifier",
+  "xgboost_version": "3.4.1",
+  "sklearn_version": "1.6.1",
+  "random_state": 42,
+  "target": "target_at_risk",
+  "positive_class_meaning": "Fail or Withdrawn",
+  "test_presentation": "2014J",
+  "training_presentations": [
+    "2013B",
+    "2013J",
+    "2014B"
+  ],
+  "training_rows": 18311,
+  "test_rows": 9211,
+  "manifest_predictor_count": 63,
+  "numeric_predictor_count": 57,
+  "categorical_predictor_count": 6,
+  "threshold": 0.5,
+  "accuracy": 0.6947128433394854,
+  "balanced_accuracy": 0.679118409081147,
+  "precision": 0.6338347998864604,
+  "recall": 0.5946737683089215,
+  "f1": 0.6136301181643309,
+  "roc_auc": 0.7536954393164929,
+  "average_precision": 0.6989423932678974,
+  "confusion_matrix": [
+    [
+      4166,
+      1290
+    ],
+    [
+      1522,
+      2233
+    ]
+  ],
+  "classification_report": {
+    "On track": {
+      "precision": 0.7324191279887482,
+      "recall": 0.7635630498533724,
+      "f1-score": 0.7476669059583633,
+      "support": 5456.0
+    },
+    "At risk": {
+      "precision": 0.6338347998864604,
+      "recall": 0.5946737683089215,
+      "f1-score": 0.6136301181643309,
+      "support": 3755.0
+    },
+    "accuracy": 0.6947128433394854,
+    "macro avg": {
+      "precision": 0.6831269639376043,
+      "recall": 0.679118409081147,
+      "f1-score": 0.680648512061347,
+      "support": 9211.0
+    },
+    "weighted avg": {
+      "precision": 0.6922297726501215,
+      "recall": 0.6947128433394854,
+      "f1-score": 0.6930248325497658,
+      "support": 9211.0
+    }
+  }
+}

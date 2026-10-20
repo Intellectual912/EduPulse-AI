@@ -1,0 +1,11 @@
+{
+  "name": "edupulse-ai",
+  "version": "1.0.0",
+  "description": "Early-Warning Academic Performance Risk Classifier & Socratic Coaching Platform",
+  "scripts": {
+    "dev": "python server.py",
+    "start": "python server.py"
+  },
+  "author": "EduPulse AI Team",
+  "license": "CC-BY-4.0"
+}
