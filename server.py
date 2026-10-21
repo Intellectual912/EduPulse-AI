@@ -575,8 +575,47 @@ if os.path.exists(FIGURES_DIR):
     app.mount("/figures", StaticFiles(directory=FIGURES_DIR), name="figures")
 
 # Mount frontend
+@app.post("/api/knowledge-tracing/demo")
+def knowledge_tracing_demo(payload: dict):
+    """Demonstrate BKT on a supplied response sequence; not real student data."""
+    from src.knowledge_tracing import BKTParameters, trace_skill
+
+    responses = payload.get("responses")
+    if not isinstance(responses, list) or not responses:
+        raise HTTPException(
+            status_code=400,
+            detail="'responses' must be a non-empty list of true/false values."
+        )
+    if any(type(item) is not bool for item in responses):
+        raise HTTPException(
+            status_code=400,
+            detail="Every response must be a JSON boolean: true or false."
+        )
+
+    parameters = BKTParameters()
+    history = trace_skill(responses, parameters)
+
+    return {
+        "model": "Bayesian Knowledge Tracing (BKT)",
+        "mode": "demonstration",
+        "responses": responses,
+        "mastery_after_each_response": history,
+        "final_mastery_percent": round(history[-1] * 100, 2),
+        "parameters": {
+            "initial_mastery": parameters.initial_mastery,
+            "learn_probability": parameters.learn_probability,
+            "guess_probability": parameters.guess_probability,
+            "slip_probability": parameters.slip_probability,
+        },
+        "limitation": (
+            "Demonstration only. No verified assessment-to-concept mapping "
+            "or real student mastery validation is connected yet."
+        ),
+    }
+
 if os.path.exists(WEB_DIR):
     app.mount("/", StaticFiles(directory=WEB_DIR, html=True), name="web")
+
 
 if __name__ == "__main__":
     import uvicorn
