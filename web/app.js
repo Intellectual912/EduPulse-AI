@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initSimulator();
   initCutoffs();
   initFeatures();
+  initTextbookAI();
   initModal();
 });
 
@@ -1101,4 +1102,94 @@ function renderStudentDetail(data) {
       });
     });
   }
+}
+
+
+
+/* ==========================================================================
+   Tab 7: Textbook AI Assistant
+   ========================================================================== */
+function initTextbookAI() {
+  const askButton = document.getElementById('rag-ask-btn');
+  const questionInput = document.getElementById('rag-question');
+  const subjectSelect = document.getElementById('rag-subject');
+  const statusElement = document.getElementById('rag-status');
+  const answerContainer = document.getElementById('rag-answer-container');
+  const answerElement = document.getElementById('rag-answer');
+  const sourcesElement = document.getElementById('rag-sources');
+
+  if (!askButton || !questionInput || !subjectSelect) {
+    console.error('Textbook AI elements not found.');
+    return;
+  }
+
+  askButton.addEventListener('click', async () => {
+    const question = questionInput.value.trim();
+    const subject = subjectSelect.value;
+
+    if (!question) {
+      statusElement.textContent = 'Please enter a question.';
+      answerContainer.hidden = true;
+      return;
+    }
+
+    askButton.disabled = true;
+    askButton.textContent = 'Generating Answer...';
+    statusElement.textContent = 'Searching your textbook and generating an answer...';
+    answerContainer.hidden = true;
+
+    try {
+      const response = await fetch(`${API_BASE}/api/rag/ask`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          question: question,
+          subject: subject,
+          top_k: 5
+        })
+      });
+
+const responseText = await response.text();
+let data = {};
+
+try {
+  data = responseText ? JSON.parse(responseText) : {};
+} catch {
+  throw new Error(
+    `Server returned HTTP ${response.status}. ${responseText.slice(0, 200)}`
+  );
+}
+
+if (!response.ok) {
+  throw new Error(data.detail || 'Failed to generate an answer.');
+}
+
+      answerElement.textContent = data.answer || 'No answer received.';
+      answerElement.style.whiteSpace = 'pre-wrap';
+
+      answerContainer.hidden = false;
+
+      sourcesElement.replaceChildren();
+
+      (data.sources || []).forEach(source => {
+        const sourceItem = document.createElement('div');
+        sourceItem.textContent =
+          `${source.source} — PDF page ${source.page}`;
+        sourcesElement.appendChild(sourceItem);
+      });
+
+      statusElement.textContent = data.fallback
+      ? 'AI providers unavailable. Showing retrieved textbook passages instead.'
+      : `Answer generated successfully using ${data.provider || 'AI'}.`;
+
+    } catch (error) {
+      console.error('Textbook AI error:', error);
+      statusElement.textContent = `Error: ${error.message}`;
+    } finally {
+      askButton.disabled = false;
+      askButton.textContent = 'Ask Textbook AI';
+    }
+  });
 }

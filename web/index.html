@@ -50,6 +50,9 @@
         <button class="nav-tab" id="tab-btn-audit" data-tab="audit">
           <span class="tab-icon">🔬</span> Pipeline Audit
         </button>
+        <button class="nav-tab" id="tab-btn-textbook" data-tab="textbook">
+          <span class="tab-icon">📚</span> Textbook AI
+        </button>
       </nav>
 
       <div class="nav-right">
@@ -59,7 +62,50 @@
         </div>
       </div>
     </header>
+          <!-- TAB 7: TEXTBOOK AI ASSISTANT -->
+      <section class="tab-panel" id="panel-textbook">
+        <div class="section-header">
+          <div>
+            <h2>Textbook AI Assistant</h2>
+            <p>Ask questions and get answers grounded in your VTU syllabus and textbooks.</p>
+          </div>
+        </div>
 
+        <div class="glass-card section-card">
+          <div class="form-group">
+            <label for="rag-subject">Select Subject</label>
+            <select id="rag-subject">
+              <option value="Computer Networks">Computer Networks</option>
+              <option value="Theory of Computation">Theory of Computation</option>
+              <option value="Information Retrieval">Information Retrieval</option>
+              <option value="AIML Scheme and Syllabus">AIML Scheme and Syllabus</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="rag-question">Your Question</label>
+            <textarea
+              id="rag-question"
+              rows="4"
+              placeholder="Ask a question from your selected textbook..."
+            ></textarea>
+          </div>
+
+          <button class="primary-btn" id="rag-ask-btn" type="button">
+            Ask Textbook AI
+          </button>
+
+          <div id="rag-status" class="rag-status"></div>
+
+          <div id="rag-answer-container" hidden>
+            <h3>AI Answer</h3>
+            <div id="rag-answer"></div>
+
+            <h3>Textbook References</h3>
+            <div id="rag-sources"></div>
+          </div>
+        </div>
+      </section>
     <!-- Main Content Area -->
     <main class="main-content" id="main-content-view">
       

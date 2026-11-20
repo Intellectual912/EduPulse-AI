@@ -66,6 +66,10 @@ class SimulationInput(BaseModel):
     late_submission_rate: float = 0.0
     num_of_prev_attempts: int = 0
     studied_credits: int = 60
+class RAGQuestionInput(BaseModel):
+    question: str
+    subject: Optional[str] = None
+    top_k: int = 5
 
 @app.get("/api/health")
 def health():
@@ -612,7 +616,63 @@ def knowledge_tracing_demo(payload: dict):
             "or real student mastery validation is connected yet."
         ),
     }
+@app.post("/api/rag/ask")
+def rag_ask(payload: RAGQuestionInput):
+    question = payload.question.strip()
 
+    if not question:
+        raise HTTPException(
+            status_code=400,
+            detail="Question cannot be empty."
+        )
+
+    if payload.top_k < 1 or payload.top_k > 10:
+        raise HTTPException(
+            status_code=400,
+            detail="top_k must be between 1 and 10."
+        )
+
+    allowed_subjects = {
+        "Computer Networks",
+        "Theory of Computation",
+        "Information Retrieval",
+        "AIML Scheme and Syllabus",
+    }
+
+    if payload.subject is not None and payload.subject not in allowed_subjects:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid subject selected."
+        )
+
+    try:
+        from src.rag_gemini import ask_question
+
+        return ask_question(
+            question=question,
+            subject=payload.subject,
+            top_k=payload.top_k
+        )
+
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+    except Exception as exc:
+        if getattr(exc, "code", None) == 503:
+            raise HTTPException(
+                status_code=503,
+                detail="Gemini is temporarily busy. Please try again shortly."
+            )
+
+        raise HTTPException(
+            status_code=500,
+            detail=f"Textbook AI request failed: {str(exc)}"
+        )
+
+        raise HTTPException(
+            status_code=500,
+            detail=f"Textbook AI request failed: {str(exc)}"
+        )
 if os.path.exists(WEB_DIR):
     app.mount("/", StaticFiles(directory=WEB_DIR, html=True), name="web")
 
