@@ -171,7 +171,7 @@ def load_resources():
     client = genai.Client(
         api_key=api_key,
         http_options=genai.types.HttpOptions(
-            timeout=30000
+            timeout=60000
         )
     )
 
@@ -327,8 +327,8 @@ Provide the answer:
             error_code = getattr(exc, "code", None)
             is_timeout = "timeout" in type(exc).__name__.lower()
 
-            if (error_code == 503 or is_timeout) and attempt == 0:
-                print("Gemini temporarily unavailable. Retrying once...")
+            if (error_code in (503, 504) or is_timeout) and attempt == 0:
+                print("Gemini temporarily unavailable or timed out. Retrying once...")
                 time.sleep(2)
                 continue
 
@@ -375,6 +375,7 @@ Provide the answer:
 
             answer = answer.strip()
             provider = "Groq (Backup)"
+            used_fallback = True
 
         except Exception as exc:
             print(f"Groq generation failed: {exc}")

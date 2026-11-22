@@ -3,6 +3,8 @@ import json
 import joblib
 import numpy as np
 import pandas as pd
+import torch
+import torch.nn as nn
 from typing import Optional, Dict, Any, List
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.staticfiles import StaticFiles
@@ -16,6 +18,19 @@ FIGURES_DIR = os.path.join(REPORTS_DIR, "figures")
 WEB_DIR = os.path.join(BASE_DIR, "web")
 MODEL_PATH = os.path.join(BASE_DIR, "models", "risk_classifier.joblib")
 MODEL_CACHE = None
+LSTM_MODEL_PATH = os.path.join(
+    BASE_DIR, "models", "lstm_risk_classifier.pt"
+)
+LSTM_SEQUENCE_PATH = os.path.join(
+    DATA_DIR, "lstm_sequences.npz"
+)
+LSTM_METADATA_PATH = os.path.join(
+    DATA_DIR, "lstm_sequence_metadata.csv"
+)
+LSTM_MODEL_CACHE = None
+LSTM_CHECKPOINT_CACHE = None
+LSTM_SEQUENCE_CACHE = None
+LSTM_METADATA_CACHE = None
 app = FastAPI(
     title="EduPulse AI Web Server",
     description="Early-Warning Academic Risk Classifier & Socratic Coaching Platform",
@@ -32,6 +47,69 @@ app.add_middleware(
 
 # Global in-memory cache
 DATA: Dict[str, Any] = {}
+class WeeklyLSTM(nn.Module):
+    """LSTM classifier for four weekly student activity sequences."""
+
+    def __init__(self, input_size=13, hidden_size=32, dropout=0.2):
+        super().__init__()
+
+        self.lstm = nn.LSTM(
+            input_size=input_size,
+            hidden_size=hidden_size,
+            batch_first=True,
+        )
+
+        self.dropout = nn.Dropout(dropout)
+        self.output = nn.Linear(hidden_size, 1)
+
+    def forward(self, x):
+        _, (hidden, _) = self.lstm(x)
+        last_hidden = hidden[-1]
+        return self.output(self.dropout(last_hidden)).squeeze(1)
+def load_lstm_resources():
+    global LSTM_MODEL_CACHE
+    global LSTM_CHECKPOINT_CACHE
+    global LSTM_SEQUENCE_CACHE
+    global LSTM_METADATA_CACHE
+
+    if LSTM_MODEL_CACHE is not None:
+        return
+
+    required_files = [
+        LSTM_MODEL_PATH,
+        LSTM_SEQUENCE_PATH,
+        LSTM_METADATA_PATH,
+    ]
+
+    for path in required_files:
+        if not os.path.exists(path):
+            raise FileNotFoundError(
+                f"Required LSTM file not found: {path}"
+            )
+
+    checkpoint = torch.load(
+        LSTM_MODEL_PATH,
+        map_location="cpu",
+        weights_only=False,
+    )
+
+    model = WeeklyLSTM(
+        input_size=checkpoint["input_size"],
+        hidden_size=checkpoint["hidden_size"],
+        dropout=checkpoint["dropout"],
+    )
+
+    model.load_state_dict(checkpoint["model_state_dict"])
+    model.eval()
+
+    sequences = np.load(LSTM_SEQUENCE_PATH)
+
+    metadata = pd.read_csv(LSTM_METADATA_PATH)
+
+    LSTM_CHECKPOINT_CACHE = checkpoint
+    LSTM_MODEL_CACHE = model
+    LSTM_SEQUENCE_CACHE = sequences
+    LSTM_METADATA_CACHE = metadata
 
 def load_data():
     csv_path = os.path.join(DATA_DIR, "student_features.csv")
@@ -337,28 +415,73 @@ def get_student_detail(id_student: int):
     if prev_att > 0:
         drivers.append({"factor": "Repeat Enrolment History", "impact": "Medium", "detail": f"{prev_att} previous unsuccessful attempt(s) on this course"})
 
+    
     # Archetype classification & Socratic Coach Blueprint
-    is_at_risk = bool(data_dict.get("target_at_risk") == 1)
+    # Decisions use day-28 information, not the eventual outcome.
+    
     if clicks < 60 and (sub_rate is None or sub_rate < 0.5):
         archetype = "Disengaged Inactive (Ghosting Risk)"
         coaching_strategy = "Re-engagement & Barrier Identification"
-        intervention_action = "Reach out via low-friction SMS/Email check-in to identify external obstacles (technical, personal, workload). Schedule 10-minute advisor sync."
-        socratic_prompt = f"Hi {data_dict.get('id_student')}, we noticed you haven't been on the course portal recently. The initial units build core foundations—is there any topic in Unit 1 or course access barrier we can help troubleshoot together today?"
+        intervention_action = (
+            "Contact the student to identify access, personal or workload "
+            "barriers. Arrange a short advisor check-in."
+        )
+        socratic_prompt = (
+            f"Hi {data_dict.get('id_student')}, we noticed limited "
+            "course activity. Is anything preventing you from accessing "
+            "or progressing through your learning materials?"
+        )
+    
+    elif n_due > 0 and sub_rate is not None and sub_rate < 1.0:
+        archetype = "Assessment Completion Risk"
+        coaching_strategy = "Assessment Recovery & Barrier Identification"
+        intervention_action = (
+            "Identify outstanding assessments, understand why they were "
+            "missed, and create a realistic completion plan with the student."
+        )
+        socratic_prompt = (
+            f"Hi {data_dict.get('id_student')}, our records show that "
+            f"you completed {sub_rate * 100:.0f}% of the assessments due "
+            "by day 28. What made completing the remaining assessment(s) "
+            "difficult, and what support would help you complete them?"
+        )
+    
     elif mean_sc is not None and mean_sc < 55:
         archetype = "Academic Struggler (Concept Gap)"
         coaching_strategy = "Targeted Socratic Scaffolding & Formative Remediation"
-        intervention_action = "Deploy automated diagnostic quiz on key foundational concepts tested in Assessment 1. Refer to peer tutoring or tutor office hours."
-        socratic_prompt = f"Great effort on submitting your initial assessment! Reviewing your answers, you're close on core definitions but hit stumbling blocks in analytical application. Would you like to walk through a guided 3-step practice exercise on this concept?"
-    elif late_cnt > 0 or (days_inactive and days_inactive > 7):
+        intervention_action = (
+            "Identify foundational concept gaps and provide a diagnostic "
+            "quiz followed by targeted practice."
+        )
+        socratic_prompt = (
+            "Which concept in your initial coursework did you find most "
+            "difficult? Let's work through a practice question together."
+        )
+    
+    elif late_cnt > 0 or (days_inactive is not None and days_inactive > 7):
         archetype = "Pacing & Time Management Risk"
         coaching_strategy = "Milestone Chunking & Study Routine Structuring"
-        intervention_action = "Provide a customized 7-day study schedule chunking the next upcoming assignment into bite-sized 30-minute daily checkpoints."
-        socratic_prompt = f"You are progressing well, but deadlines are tightening! What day this week works best for a 45-minute focused session to outline your draft for the next submission?"
+        intervention_action = (
+            "Create a seven-day study schedule with manageable daily milestones."
+        )
+        socratic_prompt = (
+            "What is the biggest obstacle to maintaining your study routine? "
+            "Let's plan your next learning milestone."
+        )
+    
     else:
-        archetype = "On-Track Consistent Learner" if not is_at_risk else "Moderate Pacing Risk"
+        archetype = "Engaged Learner â€” Monitor Progress"
         coaching_strategy = "Positive Reinforcement & Advanced Challenge"
-        intervention_action = "Maintain regular monitoring. Provide optional enrichment material to sustain momentum."
-        socratic_prompt = f"Impressive engagement so far! You are on pace with your study goals. Have you checked out the discussion forum topic on this week's extension reading?"
+        intervention_action = (
+            "Maintain regular monitoring and provide optional enrichment "
+            "material to sustain momentum."
+        )
+        socratic_prompt = (
+        "Your learning activity shows encouraging engagement. "
+        "Which topic would you like to explore more deeply?"
+    )
+    # Historical outcome metadata only; not used for coaching decisions.
+    is_at_risk = bool(data_dict.get("target_at_risk") == 1)
 
     return {
         "student": data_dict,
@@ -488,6 +611,94 @@ def predict_saved_student(
             "on VTU students."
         )
     }
+
+@app.get("/api/lstm-predict/{id_student}")
+def predict_lstm_student(
+    id_student: int,
+    presentation: str = Query(..., min_length=5, max_length=5)
+):
+    try:
+        load_lstm_resources()
+    except Exception as exc:
+        raise HTTPException(
+            status_code=503,
+            detail=f"LSTM resources could not be loaded: {exc}"
+        )
+
+    metadata = LSTM_METADATA_CACHE
+
+    matches = metadata[
+        (metadata["id_student"] == id_student)
+        & (metadata["code_presentation"].astype(str) == presentation)
+    ]
+
+    if matches.empty:
+        raise HTTPException(
+            status_code=404,
+            detail="Student sequence not found for this presentation."
+        )
+
+    if len(matches) != 1:
+        raise HTTPException(
+            status_code=409,
+            detail="Multiple matching LSTM sequences were found."
+        )
+
+    student_index = int(matches.index[0])
+
+    X = LSTM_SEQUENCE_CACHE["X"][student_index].astype(np.float32)
+    score_mask = LSTM_SEQUENCE_CACHE[
+        "score_missing_mask"
+    ][student_index].astype(np.float32)
+
+    # Reproduce the exact training preprocessing.
+    X[:, :7] = np.log1p(np.maximum(X[:, :7], 0))
+
+    mean = LSTM_CHECKPOINT_CACHE["feature_mean"]
+    std = LSTM_CHECKPOINT_CACHE["feature_std"]
+
+    X_normalized = (X - mean.reshape(1, 10)) / std.reshape(1, 10)
+
+    X_final = np.concatenate(
+        [X_normalized, score_mask],
+        axis=1
+    ).astype(np.float32)
+
+    try:
+        input_tensor = torch.from_numpy(X_final).unsqueeze(0)
+
+        with torch.no_grad():
+            logits = LSTM_MODEL_CACHE(input_tensor)
+            probability = torch.sigmoid(logits).item()
+
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"LSTM prediction failed: {exc}"
+        )
+
+    risk_percent = round(probability * 100, 1)
+    is_at_risk = probability >= 0.5
+
+    return {
+        "id_student": id_student,
+        "code_presentation": presentation,
+        "model": "Trained Weekly LSTM",
+        "risk_probability": risk_percent,
+        "risk_tier": (
+            "At Risk" if is_at_risk else "On Track"
+        ),
+        "classification_threshold": 0.5,
+        "prediction_source": (
+            "Saved LSTM model using four weeks of OULAD activity sequences"
+        ),
+        "target_definition": "Final course outcome is Fail or Withdrawn",
+        "limitation": (
+            "This model uses OULAD data and has not been validated "
+            "on VTU students."
+        )
+    }
+
 @app.post("/api/simulate")
 def simulate_risk(inp: SimulationInput):
     # Calibrated empirical logistic risk model based on OULAD Day 28 features

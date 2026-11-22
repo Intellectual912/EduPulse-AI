@@ -907,6 +907,65 @@ function renderModelPredictionError(message) {
         'The trained model prediction is currently unavailable.'
       );
     }
+    // Request the trained LSTM prediction separately.
+    try {
+      const lstmUrl =
+        `${API_BASE}/api/lstm-predict/${studentId}` +
+        `?presentation=${encodeURIComponent(presentation)}`;
+
+      const lstmRes = await fetch(lstmUrl);
+      const lstmData = await lstmRes.json();
+
+      if (!lstmRes.ok) {
+        throw new Error(
+          lstmData.detail || 'LSTM prediction unavailable'
+        );
+      }
+
+      const bodyEl = document.getElementById('modal-drawer-body');
+
+      if (bodyEl) {
+        document.getElementById('lstm-prediction-section')?.remove();
+
+        const section = document.createElement('section');
+        section.id = 'lstm-prediction-section';
+        section.style.cssText =
+          'margin-top: 20px; padding: 18px; border: 1px solid var(--brand-purple, #a78bfa); border-radius: 12px;';
+
+        const heading = document.createElement('h3');
+        heading.className = 'drawer-section-title';
+        heading.textContent = 'Trained Weekly LSTM Model Prediction';
+
+        const probability = document.createElement('p');
+        probability.textContent =
+          `Predicted risk: ${Number(lstmData.risk_probability).toFixed(1)}%`;
+
+        const tier = document.createElement('p');
+        tier.textContent = `Risk classification: ${lstmData.risk_tier}`;
+
+        const source = document.createElement('p');
+        source.style.cssText =
+          'font-size: 12px; color: var(--text-secondary);';
+        source.textContent = lstmData.prediction_source;
+
+        const limitation = document.createElement('p');
+        limitation.style.cssText =
+          'font-size: 12px; color: var(--text-secondary);';
+        limitation.textContent = `Limitation: ${lstmData.limitation}`;
+
+        section.append(
+          heading,
+          probability,
+          tier,
+          source,
+          limitation
+        );
+
+        bodyEl.appendChild(section);
+      }
+    } catch (lstmError) {
+      console.error('LSTM prediction error:', lstmError);
+    }
   } catch (err) {
     console.error('Error fetching student detail:', err);
 

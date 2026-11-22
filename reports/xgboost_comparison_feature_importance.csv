@@ -1,0 +1,93 @@
+feature,importance
+numeric__assessment_submission_rate,0.23595257
+numeric__assessment_graded_rate,0.11508812
+numeric__n_assessments_unsubmitted,0.100219704
+numeric__weighted_mean_score,0.038810357
+numeric__mean_score,0.03033429
+numeric__vle_active_weeks,0.027089054
+numeric__min_score,0.022711772
+numeric__vle_active_days,0.016483711
+numeric__mean_submission_delay_days,0.015778532
+categorical__highest_education_Lower Than A Level,0.014560525
+numeric__vle_clicks_wk1,0.014370878
+numeric__n_assessments_graded,0.012753419
+numeric__latest_score,0.011993411
+categorical__imd_band_0-10%,0.011327576
+numeric__max_score,0.010548401
+categorical__gender_F,0.009406317
+numeric__max_submission_delay_days,0.009356229
+numeric__days_since_last_submission,0.009312755
+numeric__num_of_prev_attempts,0.009055318
+numeric__studied_credits,0.007663389
+numeric__vle_days_since_last_activity,0.007576681
+numeric__n_assessments_due,0.0069232043
+numeric__vle_clicks_last7d,0.006689785
+numeric__vle_distinct_sites,0.0064302497
+numeric__vle_clicks_forum,0.0062576667
+numeric__days_cutoff_to_course_end,0.005963519
+numeric__vle_clicks_wiki,0.005953669
+numeric__first_score,0.005917543
+categorical__region_South West Region,0.0059078285
+categorical__age_band_0-35,0.0058884923
+categorical__imd_band_10-20,0.0058306325
+categorical__disability_Y,0.00562775
+categorical__region_North Western Region,0.005611935
+categorical__gender_M,0.0055924244
+numeric__vle_activity_group_count,0.005573042
+categorical__highest_education_No Formal quals,0.0055645835
+numeric__n_assessments_banked,0.005425044
+numeric__vle_clicks_quiz,0.0053957007
+categorical__imd_band_20-30%,0.0053711957
+numeric__vle_clicks_wk3,0.005271303
+numeric__vle_clicks_wk2,0.0052226037
+categorical__age_band_35-55,0.0051131165
+categorical__highest_education_A Level or Equivalent,0.0051014335
+numeric__vle_clicks_home,0.0050522555
+categorical__region_Wales,0.0049495734
+categorical__imd_band_90-100%,0.004785034
+categorical__region_West Midlands Region,0.0047594905
+categorical__region_South East Region,0.004660541
+categorical__disability_N,0.0045697433
+numeric__vle_click_share_last7,0.0045291614
+numeric__has_assessment_due,0.00451663
+numeric__std_score,0.004405042
+categorical__region_East Midlands Region,0.0042334134
+numeric__imd_band_missing,0.004198506
+numeric__vle_forum_share,0.004160358
+categorical__region_South Region,0.0039824387
+categorical__region_Scotland,0.0039783283
+numeric__vle_clicks_collab,0.00384041
+numeric__vle_click_change_last7,0.0037625374
+numeric__vle_clicks_per_active_day,0.0036813742
+categorical__imd_band_80-90%,0.0036720878
+categorical__imd_band_40-50%,0.0036642344
+categorical__highest_education_HE Qualification,0.003641852
+numeric__vle_weekly_slope,0.0035325573
+numeric__vle_clicks_prev7d,0.0034748244
+numeric__vle_clicks_total,0.0034568503
+numeric__vle_clicks_precourse,0.003268901
+numeric__registration_day,0.003244723
+numeric__registration_days_before_start,0.003126886
+categorical__imd_band_60-70%,0.0031008462
+numeric__vle_clicks_content,0.0030409906
+categorical__age_band_55<=,0.003006494
+numeric__vle_clicks_wk0,0.002966808
+categorical__region_East Anglian Region,0.0028792648
+categorical__imd_band_30-40%,0.002352711
+categorical__region_London Region,0.0023330161
+numeric__n_late_submissions,0.0022696322
+numeric__score_change,0.0022197315
+categorical__imd_band_50-60%,0.0020798447
+categorical__region_North Region,0.0020742123
+categorical__region_Yorkshire Region,0.0020416728
+numeric__late_submission_rate,0.0019454237
+numeric__registered_after_course_start,0.0017477788
+categorical__imd_band_70-80%,0.001575132
+numeric__n_assessments_submitted,0.0013149988
+numeric__days_since_registration_at_cutoff,0.00087803236
+numeric__registration_date_missing,0.0
+numeric__has_graded_assessment,0.0
+numeric__has_vle_activity,0.0
+numeric__vle_clicks_other,0.0
+categorical__region_Ireland,0.0
+categorical__highest_education_Post Graduate Qualification,0.0

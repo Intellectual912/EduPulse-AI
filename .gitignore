@@ -75,3 +75,6 @@ data/rag_sources/
 
 # Temporary backup files
 *.bak
+
+# Experimental model not used by the application
+models/xgboost_tuned_candidate.joblib
