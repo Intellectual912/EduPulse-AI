@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EduPulse AI — Early-Warning Academic Risk Platform & Socratic Coach</title>
+  <title>EduPulse AI â€” Early-Warning Academic Risk Platform & Socratic Coach</title>
   <meta name="description" content="EduPulse AI: Real-time academic risk prediction and Socratic coaching platform engineered from the Open University Learning Analytics Dataset (OULAD).">
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,7 +22,7 @@
       <div class="nav-left">
         <div class="brand-logo">
           <div class="pulse-ring"></div>
-          <span class="logo-icon">⚡</span>
+          <span class="logo-icon">&#9889;</span>
           <span class="brand-title">EduPulse <span class="highlight">AI</span></span>
         </div>
         <div class="server-badge" id="server-status-badge">
@@ -33,31 +33,34 @@
 
       <nav class="nav-links" id="main-nav-tabs" aria-label="Main Navigation">
         <button class="nav-tab active" id="tab-btn-overview" data-tab="overview">
-          <span class="tab-icon">📊</span> Overview
+          <span class="tab-icon">&#128200;</span> Overview
         </button>
         <button class="nav-tab" id="tab-btn-students" data-tab="students">
-          <span class="tab-icon">👥</span> Student Cohort
+          <span class="tab-icon">&#128101;</span> Student Cohort
         </button>
         <button class="nav-tab" id="tab-btn-simulator" data-tab="simulator">
-          <span class="tab-icon">⚡</span> Risk Simulator
+          <span class="tab-icon">&#9889;</span> Risk Simulator
         </button>
         <button class="nav-tab" id="tab-btn-cutoff" data-tab="cutoff">
-          <span class="tab-icon">⏱️</span> Cutoff Window
+          <span class="tab-icon">&#9200;</span> Cutoff Window
         </button>
         <button class="nav-tab" id="tab-btn-features" data-tab="features">
-          <span class="tab-icon">📑</span> Feature Catalog
+          <span class="tab-icon">&#128203;</span> Feature Catalog
         </button>
         <button class="nav-tab" id="tab-btn-audit" data-tab="audit">
-          <span class="tab-icon">🔬</span> Pipeline Audit
+          <span class="tab-icon">&#128300;</span> Pipeline Audit
         </button>
         <button class="nav-tab" id="tab-btn-textbook" data-tab="textbook">
-          <span class="tab-icon">📚</span> Textbook AI
+          <span class="tab-icon">&#128218;</span> Textbook AI
+        </button>
+        <button class="nav-tab" id="tab-btn-knowledge-tracing" data-tab="knowledge-tracing">
+          <span class="tab-icon">&#129504;</span> Knowledge Tracing
         </button>
       </nav>
 
       <div class="nav-right">
         <div class="nav-search-wrapper">
-          <span class="search-icon">🔍</span>
+          <span class="search-icon">&#128269;</span>
           <input type="text" id="global-student-search" placeholder="Quick find student ID..." autocomplete="off">
         </div>
       </div>
@@ -124,7 +127,7 @@
           <div class="hero-badges">
             <div class="stat-pill">
               <span class="stat-label">Observation Window</span>
-              <span class="stat-value">Days −∞ … 28</span>
+              <span class="stat-value">Days 0–28</span>
             </div>
             <div class="stat-pill highlight">
               <span class="stat-label">Intervention Lead Time</span>
@@ -138,7 +141,7 @@
           <div class="kpi-card" id="kpi-total-enrolments">
             <div class="kpi-header">
               <span class="kpi-title">Monitored Enrolments</span>
-              <span class="kpi-icon">🎓</span>
+              <span class="kpi-icon">&#127891;</span>
             </div>
             <div class="kpi-number" id="val-total-enrolments">27,522</div>
             <div class="kpi-subtext">Post-cutoff valid cohort (5,055 pre-day 28 withdrawals excluded)</div>
@@ -147,7 +150,7 @@
           <div class="kpi-card danger" id="kpi-at-risk">
             <div class="kpi-header">
               <span class="kpi-title">At-Risk Prevalence</span>
-              <span class="kpi-icon">⚠️</span>
+              <span class="kpi-icon">&#9888;&#65039;</span>
             </div>
             <div class="kpi-number" id="val-at-risk-rate">44.1%</div>
             <div class="kpi-subtext" id="val-at-risk-count">12,143 students (Fail: 7,037 + Withdrawn: 5,106)</div>
@@ -156,7 +159,7 @@
           <div class="kpi-card success" id="kpi-on-track">
             <div class="kpi-header">
               <span class="kpi-title">On-Track (Passing)</span>
-              <span class="kpi-icon">✅</span>
+              <span class="kpi-icon">&#9989;</span>
             </div>
             <div class="kpi-number" id="val-on-track-rate">55.9%</div>
             <div class="kpi-subtext" id="val-on-track-count">15,379 students (Pass: 12,356 + Distinction: 3,023)</div>
@@ -165,7 +168,7 @@
           <div class="kpi-card accent" id="kpi-features-count">
             <div class="kpi-header">
               <span class="kpi-title">Leakage-Free Features</span>
-              <span class="kpi-icon">🛡️</span>
+              <span class="kpi-icon">&#128737;&#65039;</span>
             </div>
             <div class="kpi-number">63</div>
             <div class="kpi-subtext">Across 4 families: Demographics, Timing, Assessment, VLE</div>
@@ -237,7 +240,7 @@
             <p class="section-desc">Inspect, filter, and drill into individual student profiles across all 27,522 enrolments.</p>
           </div>
           <div class="panel-actions">
-            <button class="btn btn-secondary" id="btn-export-cohort">📥 Export View (CSV)</button>
+            <button class="btn btn-secondary" id="btn-export-cohort">&#128229; Export View (CSV)</button>
           </div>
         </div>
 
@@ -277,8 +280,8 @@
             <label for="filter-risk">Risk Status</label>
             <select id="filter-risk">
               <option value="all">All Cohorts</option>
-              <option value="at_risk">⚠️ At-Risk Only (Fail / Withdrawn)</option>
-              <option value="safe">✅ On-Track Only (Pass / Distinction)</option>
+              <option value="at_risk">&#9888;&#65039; At-Risk Only (Fail / Withdrawn)</option>
+              <option value="safe">&#9989; On-Track Only (Pass / Distinction)</option>
             </select>
           </div>
 
@@ -330,7 +333,7 @@
           <!-- Pagination Bar -->
           <div class="pagination-bar" id="students-pagination">
             <div class="pagination-info" id="pagination-info-text">
-              Showing 1–25 of 27,522 students
+              Showing 1â€“25 of 27,522 students
             </div>
             <div class="pagination-controls">
               <button class="btn-page" id="btn-prev-page" disabled>&larr; Prev</button>
@@ -356,7 +359,7 @@
         <div class="simulator-layout">
           <!-- Controls Column -->
           <div class="glass-card sim-controls-card">
-            <h3 class="card-title">Early Warning Levers (Day ≤ 28)</h3>
+            <h3 class="card-title">Early Warning Levers (Day â‰¤ 28)</h3>
             <p class="card-subtitle">Test how engagement & coursework timeliness shift risk probabilities</p>
 
             <div class="slider-group">
@@ -388,7 +391,7 @@
 
             <div class="slider-group">
               <div class="slider-header">
-                <label for="sim-score">First Assessment Score (0–100)</label>
+                <label for="sim-score">First Assessment Score (0â€“100)</label>
                 <span class="slider-val" id="val-sim-score">68</span>
               </div>
               <input type="range" id="sim-score" min="0" max="100" step="1" value="68">
@@ -458,7 +461,7 @@
             <div class="glass-card sim-coach-card">
               <div class="card-header">
                 <div class="coach-header-brand">
-                  <span class="coach-spark">✨</span>
+                  <span class="coach-spark">&#10024;</span>
                   <h3 class="card-title">AI Socratic Coach Intervention</h3>
                 </div>
                 <span class="badge highlight">Milestone 3 Preview</span>
@@ -482,7 +485,7 @@
                   <blockquote class="socratic-prompt" id="sim-coach-prompt">
                     "You're off to a fantastic start! Your first assessment submission showed solid grasp of foundational principles. How did you find the self-assessment exercise in Unit 2?"
                   </blockquote>
-                  <button class="btn btn-outline btn-sm copy-btn" id="btn-copy-sim-prompt">📋 Copy Message</button>
+                  <button class="btn btn-outline btn-sm copy-btn" id="btn-copy-sim-prompt">&#128203; Copy Message</button>
                 </div>
               </div>
             </div>
@@ -503,7 +506,7 @@
 
         <div class="glass-card cutoff-rationale-card">
           <div class="rationale-header">
-            <span class="rationale-icon">💡</span>
+            <span class="rationale-icon">&#128161;</span>
             <div>
               <h3 class="rationale-title">The Fundamental Prediction Dilemma in Learning Analytics</h3>
               <p class="rationale-text">
@@ -527,7 +530,7 @@
                   <th>Cutoff Day</th>
                   <th>Cohort Size</th>
                   <th>Modules with Due Work</th>
-                  <th>Enrolments with ≥1 Grade</th>
+                  <th>Enrolments with â‰¥1 Grade</th>
                   <th>Mean Graded Work</th>
                   <th>VLE Clicks in Window</th>
                   <th>Intervention Runway</th>
@@ -564,7 +567,7 @@
         <!-- Feature Families Summary Grid -->
         <div class="feature-families-grid">
           <div class="family-card" data-family="demographics">
-            <div class="family-icon">👤</div>
+            <div class="family-icon">&#128100;</div>
             <div class="family-info">
               <span class="family-name">Static Demographics</span>
               <span class="family-count">9 Features</span>
@@ -573,7 +576,7 @@
           </div>
 
           <div class="family-card" data-family="registration">
-            <div class="family-icon">📅</div>
+            <div class="family-icon">&#128197;</div>
             <div class="family-info">
               <span class="family-name">Registration Timing</span>
               <span class="family-count">5 Features</span>
@@ -582,16 +585,16 @@
           </div>
 
           <div class="family-card" data-family="assessment">
-            <div class="family-icon">📝</div>
+            <div class="family-icon">&#128214;</div>
             <div class="family-info">
               <span class="family-name">Windowed Assessment</span>
               <span class="family-count">22 Features</span>
             </div>
-            <p class="family-desc">Due, submitted, graded, late rates, mean/weighted scores strictly due and submitted ≤ Day 28.</p>
+            <p class="family-desc">Due, submitted, graded, late rates, mean/weighted scores strictly due and submitted â‰¤ Day 28.</p>
           </div>
 
           <div class="family-card" data-family="vle">
-            <div class="family-icon">🖱️</div>
+            <div class="family-icon">&#128187;</div>
             <div class="family-info">
               <span class="family-name">VLE Engagement & Velocity</span>
               <span class="family-count">22 Features</span>
@@ -689,6 +692,55 @@
         </div>
       </section>
 
+      <!-- TAB 8: KNOWLEDGE TRACING -->
+      <section class="tab-panel" id="panel-knowledge-tracing">
+        <div class="section-header">
+          <div>
+            <h2>Computer Networks Knowledge Tracing</h2>
+            <p>Assess concept understanding through diagnostic questions and Bayesian Knowledge Tracing.</p>
+          </div>
+        </div>
+
+        <div class="glass-card section-card">
+          <div class="form-group">
+            <label for="cn-module-select">Select Module</label>
+            <select id="cn-module-select">
+              <option value="1">Module 1 - Introduction</option>
+            </select>
+          </div>
+
+          <button class="primary-btn" id="cn-start-btn" type="button">
+            Start Diagnostic Session
+          </button>
+
+          <div id="cn-session-status" class="rag-status" aria-live="polite"></div>
+
+          <div id="cn-question-container" hidden>
+            <h3 id="cn-question-progress">Diagnostic Question</h3>
+            <div id="cn-question-text"></div>
+            <div id="cn-answer-options"></div>
+            <button class="primary-btn" id="cn-submit-answer-btn" type="button" disabled>
+              Submit Answer
+            </button>
+            <div id="cn-answer-feedback" class="rag-status" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <div class="glass-card section-card" id="cn-mastery-container" hidden>
+          <div class="card-header">
+            <h3 class="card-title">Concept Mastery Report</h3>
+          </div>
+          <div id="cn-mastery-report"></div>
+          <div class="cn-prerequisite-section">
+            <h3 class="card-title">Prerequisite Readiness & Learning Recommendations</h3>
+            <div id="cn-prerequisite-report"></div>
+          </div>
+        </div>
+
+        <p class="section-note">
+          Demonstration only: mastery estimates are session-based, and the concept mappings and questions are pending faculty verification.
+        </p>
+      </section>
     </main>
 
     <!-- Student Detail Modal / Drawer -->

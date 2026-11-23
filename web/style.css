@@ -1,6 +1,6 @@
-/* ==========================================================================
-   EduPulse AI — Design System & Stylesheet
-   Modern Glassmorphism • Dark Mode • Ultra-Clean Typography
+﻿/* ==========================================================================
+   EduPulse AI â€” Design System & Stylesheet
+   Modern Glassmorphism â€¢ Dark Mode â€¢ Ultra-Clean Typography
    ========================================================================== */
 
 :root {
@@ -1513,4 +1513,173 @@ input[type="range"]::-webkit-slider-thumb:hover {
   .features-list-container { grid-template-columns: 1fr; }
   .figures-grid { grid-template-columns: 1fr; }
   .nav-links { display: none; } /* hamburger could be added for mobile */
+}
+
+/* Knowledge Tracing Dashboard Styles */
+#panel-knowledge-tracing .form-group {
+  margin-bottom: 20px;
+}
+
+#panel-knowledge-tracing label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+#cn-module-select {
+  width: 100%;
+  max-width: 420px;
+  padding: 11px 14px;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+}
+
+#panel-knowledge-tracing .primary-btn {
+  padding: 11px 20px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--brand-cyan);
+  color: #07111f;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+#panel-knowledge-tracing .primary-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#cn-session-status,
+#cn-answer-feedback {
+  margin-top: 16px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+#cn-question-container {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-glass);
+}
+
+#cn-question-text {
+  margin: 16px 0;
+  color: var(--text-primary);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.cn-option {
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
+  margin: 10px 0 !important;
+  padding: 13px 15px;
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.cn-option:hover {
+  border-color: var(--brand-cyan);
+}
+
+.cn-option input {
+  accent-color: var(--brand-cyan);
+}
+
+.cn-option span {
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+#cn-submit-answer-btn {
+  margin-top: 16px;
+}
+
+.cn-mastery-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 5px 16px;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border-glass);
+}
+
+.cn-mastery-row span {
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.cn-mastery-row strong {
+  color: var(--brand-cyan);
+  font-size: 15px;
+}
+
+.cn-mastery-row small {
+  grid-column: 1 / -1;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+#cn-mastery-container {
+  margin-top: 22px;
+}
+
+#panel-knowledge-tracing .section-note {
+  margin-top: 16px;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+
+.cn-prerequisite-section {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-glass);
+}
+
+.cn-prerequisite-section > .card-title {
+  margin-bottom: 14px;
+}
+
+.cn-prerequisite-row {
+  padding: 15px 0;
+  border-bottom: 1px solid var(--border-glass);
+}
+
+.cn-prerequisite-row strong {
+  display: block;
+  color: var(--text-primary);
+  font-size: 13px;
+  margin-bottom: 7px;
+}
+
+.cn-prerequisite-status {
+  display: inline-block;
+  color: var(--brand-cyan);
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.cn-prerequisite-row p,
+.cn-prerequisite-row li {
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.cn-prerequisite-row p {
+  margin: 4px 0 8px;
+}
+
+.cn-prerequisite-row ul {
+  margin: 6px 0 0;
+  padding-left: 20px;
 }

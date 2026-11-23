@@ -1,4 +1,5 @@
 import os
+import uuid
 import json
 import joblib
 import numpy as np
@@ -47,6 +48,7 @@ app.add_middleware(
 
 # Global in-memory cache
 DATA: Dict[str, Any] = {}
+CN_SESSIONS = {}
 class WeeklyLSTM(nn.Module):
     """LSTM classifier for four weekly student activity sequences."""
 
@@ -148,6 +150,15 @@ class RAGQuestionInput(BaseModel):
     question: str
     subject: Optional[str] = None
     top_k: int = 5
+
+class CNSessionInput(BaseModel):
+    module: Optional[int] = None
+
+
+class CNAnswerInput(BaseModel):
+    session_id: str
+    question_id: str
+    selected_option: str
 
 @app.get("/api/health")
 def health():
@@ -470,7 +481,7 @@ def get_student_detail(id_student: int):
         )
     
     else:
-        archetype = "Engaged Learner â€” Monitor Progress"
+        archetype = "Engaged Learner ? Monitor Progress"
         coaching_strategy = "Positive Reinforcement & Advanced Challenge"
         intervention_action = (
             "Maintain regular monitoring and provide optional enrichment "
@@ -827,6 +838,74 @@ def knowledge_tracing_demo(payload: dict):
             "or real student mastery validation is connected yet."
         ),
     }
+@app.post("/api/cn-knowledge-tracing/sessions")
+def start_cn_diagnostic_session(payload: CNSessionInput):
+    """Start an independent Computer Networks diagnostic session."""
+    from src.cn_diagnostic_service import CNDiagnosticService
+
+    service = CNDiagnosticService()
+    questions = service.get_questions(module=payload.module)
+
+    if not questions:
+        raise HTTPException(
+            status_code=400,
+            detail="No diagnostic questions found for this module."
+        )
+
+    session_id = str(uuid.uuid4())
+    CN_SESSIONS[session_id] = service
+
+    return {
+        "session_id": session_id,
+        "mode": "demonstration",
+        "module": payload.module,
+        "questions": questions,
+        "limitation": (
+            "In-memory demonstration session. Progress is lost when "
+            "the server restarts. Concept mappings and questions "
+            "are pending faculty verification."
+        ),
+    }
+
+
+@app.post("/api/cn-knowledge-tracing/answer")
+def submit_cn_diagnostic_answer(payload: CNAnswerInput):
+    """Submit one answer and update the session's concept mastery."""
+    service = CN_SESSIONS.get(payload.session_id)
+
+    if service is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Diagnostic session not found or expired."
+        )
+
+    try:
+        return service.submit_answer(
+            payload.question_id,
+            payload.selected_option,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@app.get("/api/cn-knowledge-tracing/sessions/{session_id}/mastery")
+def get_cn_session_mastery(session_id: str):
+    """Return the concept mastery report for one diagnostic session."""
+    service = CN_SESSIONS.get(session_id)
+
+    if service is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Diagnostic session not found or expired."
+        )
+
+    return {
+        "session_id": session_id,
+        "mode": "demonstration",
+        "mastery_report": service.get_mastery_report(),
+        "prerequisite_report": service.get_prerequisite_report(),
+    }
+
 @app.post("/api/rag/ask")
 def rag_ask(payload: RAGQuestionInput):
     question = payload.question.strip()

@@ -1,6 +1,6 @@
 /**
- * EduPulse AI — Interactive Web Application Logic
- * Clean ES6+ • Real-time Data Visualization • Socratic Coach Preview
+ * EduPulse AI ? Interactive Web Application Logic
+ * Clean ES6+ ? Real-time Data Visualization ? Socratic Coach Preview
  */
 
 const API_BASE = window.location.origin;
@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initCutoffs();
   initFeatures();
   initTextbookAI();
+  initKnowledgeTracing();
   initModal();
 });
 
@@ -278,7 +279,7 @@ function renderCharts(data) {
     state.charts.engagement = new Chart(ctxEng, {
       type: 'bar',
       data: {
-        labels: ['Total Clicks', 'Active Days × 20', 'Submission %'],
+        labels: ['Total Clicks', 'Active Days ? 20', 'Submission %'],
         datasets: [
           {
             label: 'Safe Cohort',
@@ -440,7 +441,7 @@ async function loadStudents() {
     if (paginationInfo) {
       const start = (data.page - 1) * data.limit + 1;
       const end = Math.min(data.page * data.limit, data.total);
-      paginationInfo.textContent = `Showing ${start.toLocaleString()}–${end.toLocaleString()} of ${data.total.toLocaleString()} students`;
+      paginationInfo.textContent = `Showing ${start.toLocaleString()}?${end.toLocaleString()} of ${data.total.toLocaleString()} students`;
     }
 
     if (prevBtn) prevBtn.disabled = (data.page <= 1);
@@ -468,7 +469,7 @@ function renderStudentsTable(students) {
     const inactiveStr = (s.vle_days_since_last_activity !== null && s.vle_days_since_last_activity !== undefined) ? `${s.vle_days_since_last_activity}d ago` : 'Never';
     const riskPill = isRisk
       ? `<span class="risk-pill at-risk">⚠️ ${s.final_result}</span>`
-      : `<span class="risk-pill safe">✅ ${s.final_result}</span>`;
+      : `<span class="risk-pill safe">SAFE ${s.final_result}</span>`;
 
     return `
       <tr>
@@ -530,8 +531,8 @@ function initSimulator() {
     copyBtn.addEventListener('click', () => {
       const promptText = document.getElementById('sim-coach-prompt')?.textContent || '';
       navigator.clipboard.writeText(promptText).then(() => {
-        copyBtn.textContent = '✅ Copied!';
-        setTimeout(() => copyBtn.textContent = '📋 Copy Message', 2000);
+        copyBtn.textContent = 'Copied!';
+        setTimeout(() => copyBtn.textContent = 'Copy Message Copy Message', 2000);
       });
     });
   }
@@ -988,7 +989,7 @@ function renderStudentDetail(data) {
   const isRisk = p.is_at_risk;
   const statusPill = isRisk
     ? `<span class="risk-pill at-risk">⚠️ At-Risk (${p.final_outcome})</span>`
-    : `<span class="risk-pill safe">✅ On-Track (${p.final_outcome})</span>`;
+    : `<span class="risk-pill safe">SAFE On-Track (${p.final_outcome})</span>`;
 
   if (metaTagsEl) {
     metaTagsEl.innerHTML = `
@@ -1108,7 +1109,7 @@ function renderStudentDetail(data) {
           <span style="font-size: 11px; text-transform: uppercase; color: var(--accent-emerald); font-weight: 700; letter-spacing: 0.5px;">Protective Signals:</span>
           ${p.protective_factors.map(pf => `
             <div class="driver-item safe">
-              <span>✅</span>
+              <span>OK</span>
               <div>
                 <strong>${pf.factor}:</strong> ${pf.detail}
               </div>
@@ -1121,7 +1122,7 @@ function renderStudentDetail(data) {
     <!-- Socratic Coach Blueprint -->
     <div class="glass-card" style="background: rgba(6, 182, 212, 0.05); border-color: rgba(6, 182, 212, 0.25);">
       <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
-        <span style="font-size: 18px;">✨</span>
+        <span style="font-size: 18px;">AI</span>
         <h3 class="card-title" style="font-size: 16px;">AI Socratic Coaching Blueprint</h3>
       </div>
 
@@ -1144,7 +1145,7 @@ function renderStudentDetail(data) {
         <div class="coach-prompt-box">
           <span class="prompt-label">Suggested Socratic Outreach Message:</span>
           <blockquote class="socratic-prompt" id="modal-socratic-msg">${p.socratic_coaching_prompt}</blockquote>
-          <button class="btn btn-outline btn-sm copy-btn" id="btn-copy-modal-prompt">📋 Copy Message</button>
+          <button class="btn btn-outline btn-sm copy-btn" id="btn-copy-modal-prompt">Copy Message Copy Message</button>
         </div>
       </div>
     </div>
@@ -1156,8 +1157,8 @@ function renderStudentDetail(data) {
     copyModalBtn.addEventListener('click', () => {
       const msg = document.getElementById('modal-socratic-msg')?.textContent || '';
       navigator.clipboard.writeText(msg).then(() => {
-        copyModalBtn.textContent = '✅ Copied!';
-        setTimeout(() => copyModalBtn.textContent = '📋 Copy Message', 2000);
+        copyModalBtn.textContent = 'Copied!';
+        setTimeout(() => copyModalBtn.textContent = 'Copy Message Copy Message', 2000);
       });
     });
   }
@@ -1235,7 +1236,7 @@ if (!response.ok) {
       (data.sources || []).forEach(source => {
         const sourceItem = document.createElement('div');
         sourceItem.textContent =
-          `${source.source} — PDF page ${source.page}`;
+          `${source.source} ? PDF page ${source.page}`;
         sourcesElement.appendChild(sourceItem);
       });
 
@@ -1249,6 +1250,258 @@ if (!response.ok) {
     } finally {
       askButton.disabled = false;
       askButton.textContent = 'Ask Textbook AI';
+    }
+  });
+}
+
+// ==========================================================================
+// Tab 8: Computer Networks Knowledge Tracing
+// ==========================================================================
+function initKnowledgeTracing() {
+  const startButton = document.getElementById('cn-start-btn');
+  const moduleSelect = document.getElementById('cn-module-select');
+  const status = document.getElementById('cn-session-status');
+  const questionContainer = document.getElementById('cn-question-container');
+  const progress = document.getElementById('cn-question-progress');
+  const questionText = document.getElementById('cn-question-text');
+  const optionsContainer = document.getElementById('cn-answer-options');
+  const submitButton = document.getElementById('cn-submit-answer-btn');
+  const feedback = document.getElementById('cn-answer-feedback');
+  const masteryContainer = document.getElementById('cn-mastery-container');
+  const masteryReport = document.getElementById('cn-mastery-report');
+  const prerequisiteReport = document.getElementById('cn-prerequisite-report');
+
+  if (!startButton || !moduleSelect || !submitButton) {
+    console.error('Knowledge Tracing elements not found.');
+    return;
+  }
+
+  let sessionId = null;
+  let questions = [];
+  let currentIndex = 0;
+  let selectedOption = null;
+  let answered = false;
+
+  function renderQuestion() {
+    const item = questions[currentIndex];
+
+    selectedOption = null;
+    answered = false;
+
+    progress.textContent =
+      `Question ${currentIndex + 1} of ${questions.length}`;
+
+    questionText.textContent = item.question;
+    optionsContainer.replaceChildren();
+    feedback.textContent = '';
+
+    Object.entries(item.options).forEach(([key, value]) => {
+      const label = document.createElement('label');
+      label.className = 'cn-option';
+
+      const radio = document.createElement('input');
+      radio.type = 'radio';
+      radio.name = 'cn-answer';
+      radio.value = key;
+
+      radio.addEventListener('change', () => {
+        selectedOption = key;
+        submitButton.disabled = false;
+      });
+
+      const text = document.createElement('span');
+      text.textContent = `${key}. ${value}`;
+
+      label.append(radio, text);
+      optionsContainer.appendChild(label);
+    });
+
+    submitButton.disabled = true;
+    submitButton.textContent = 'Submit Answer';
+  }
+
+  async function loadMasteryReport() {
+    try {
+      const response = await fetch(
+        `${API_BASE}/api/cn-knowledge-tracing/sessions/${sessionId}/mastery`
+      );
+
+      if (!response.ok) {
+        throw new Error('Could not load mastery report.');
+      }
+
+      const data = await response.json();
+      masteryReport.replaceChildren();
+
+      (data.mastery_report || []).forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'cn-mastery-row';
+
+        const name = document.createElement('span');
+        name.textContent = item.concept_name;
+
+        const value = document.createElement('strong');
+        value.textContent = `${item.mastery_percentage}%`;
+
+        const attempts = document.createElement('small');
+        attempts.textContent = `Questions attempted: ${item.questions_attempted}`;
+
+        row.append(name, value, attempts);
+        masteryReport.appendChild(row);
+      });
+
+      prerequisiteReport.replaceChildren();
+
+      (data.prerequisite_report || []).forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'cn-prerequisite-row';
+
+        const name = document.createElement('strong');
+        name.textContent = item.concept_name;
+
+        const readiness = document.createElement('span');
+        readiness.className = 'cn-prerequisite-status';
+        readiness.textContent = `Readiness: ${item.readiness}`;
+
+        const recommendation = document.createElement('p');
+        recommendation.textContent = item.recommendation;
+
+        row.append(name, readiness, recommendation);
+
+        if (item.prerequisites && item.prerequisites.length > 0) {
+          const list = document.createElement('ul');
+
+          item.prerequisites.forEach(prerequisite => {
+            const entry = document.createElement('li');
+            entry.textContent =
+              `${prerequisite.concept_name}: ${prerequisite.status} ` +
+              `(${prerequisite.mastery_percentage}% mastery, ` +
+              `${prerequisite.questions_attempted} attempts)`;
+            list.appendChild(entry);
+          });
+
+          row.appendChild(list);
+        }
+
+        prerequisiteReport.appendChild(row);
+      });
+
+      masteryContainer.hidden = false;
+    } catch (error) {
+      status.textContent = `Mastery report error: ${error.message}`;
+    }
+  }
+
+  startButton.addEventListener('click', async () => {
+    startButton.disabled = true;
+    startButton.textContent = 'Starting...';
+    status.textContent = 'Creating diagnostic session...';
+
+    questionContainer.hidden = true;
+    masteryContainer.hidden = true;
+    feedback.textContent = '';
+
+    try {
+      const response = await fetch(
+        `${API_BASE}/api/cn-knowledge-tracing/sessions`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            module: Number(moduleSelect.value)
+          })
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.detail || 'Could not start session.');
+      }
+
+      sessionId = data.session_id;
+      questions = data.questions || [];
+      currentIndex = 0;
+
+      if (!questions.length) {
+        throw new Error('No diagnostic questions are available.');
+      }
+
+      status.textContent =
+        'Diagnostic session started. Initial mastery is an estimate, not a measured score.';
+
+      questionContainer.hidden = false;
+      renderQuestion();
+    } catch (error) {
+      status.textContent = `Error: ${error.message}`;
+    } finally {
+      startButton.disabled = false;
+      startButton.textContent = 'Start Diagnostic Session';
+    }
+  });
+
+  submitButton.addEventListener('click', async () => {
+    if (!sessionId || !questions.length) return;
+
+    if (answered) {
+      currentIndex++;
+
+      if (currentIndex >= questions.length) {
+        questionContainer.hidden = true;
+        status.textContent = 'All diagnostic questions completed.';
+        await loadMasteryReport();
+        return;
+      }
+
+      renderQuestion();
+      return;
+    }
+
+    if (!selectedOption) return;
+
+    submitButton.disabled = true;
+
+    try {
+      const response = await fetch(
+        `${API_BASE}/api/cn-knowledge-tracing/answer`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            session_id: sessionId,
+            question_id: questions[currentIndex].question_id,
+            selected_option: selectedOption
+          })
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.detail || 'Could not submit answer.');
+      }
+
+      answered = true;
+
+      optionsContainer.querySelectorAll('input').forEach(radio => {
+        radio.disabled = true;
+      });
+
+      feedback.textContent =
+        `${data.correct ? 'Correct!' : 'Incorrect.'} ` +
+        `Correct answer: ${data.correct_option}. ` +
+        `${data.explanation} ` +
+        `Updated concept mastery: ${data.mastery_percentage}%.`;
+
+      submitButton.textContent =
+        currentIndex === questions.length - 1
+          ? 'View Mastery Report'
+          : 'Next Question';
+
+      submitButton.disabled = false;
+    } catch (error) {
+      feedback.textContent = `Error: ${error.message}`;
+      submitButton.disabled = false;
     }
   });
 }
