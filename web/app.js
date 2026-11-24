@@ -1226,20 +1226,44 @@ if (!response.ok) {
   throw new Error(data.detail || 'Failed to generate an answer.');
 }
 
-      answerElement.textContent = data.answer || 'No answer received.';
-      answerElement.style.whiteSpace = 'pre-wrap';
+      const markdownAnswer = data.answer || 'No answer received.';
+      const renderedAnswer = marked.parse(markdownAnswer, { gfm: true, breaks: false });
+      answerElement.innerHTML = DOMPurify.sanitize(renderedAnswer);
+      answerElement.style.whiteSpace = 'normal';
 
       answerContainer.hidden = false;
 
       sourcesElement.replaceChildren();
 
+      const uniqueSources = new Map();
+
       (data.sources || []).forEach(source => {
-        const sourceItem = document.createElement('div');
-        sourceItem.textContent =
-          `${source.source} ? PDF page ${source.page}`;
-        sourcesElement.appendChild(sourceItem);
+        const name = String(source.source || 'Textbook');
+        const page = source.page ?? null;
+        const key = `${name}::${page}`;
+
+        if (!uniqueSources.has(key)) {
+          uniqueSources.set(key, { name, page });
+        }
       });
 
+      uniqueSources.forEach(source => {
+        const item = document.createElement('div');
+        item.className = 'rag-source-item';
+
+        const name = document.createElement('span');
+        name.className = 'rag-source-name';
+        name.textContent = source.name;
+
+        const page = document.createElement('span');
+        page.className = 'rag-source-page';
+        page.textContent = source.page !== null
+          ? `PDF page ${source.page}`
+          : 'Page unavailable';
+
+        item.append(name, page);
+        sourcesElement.appendChild(item);
+      });
       statusElement.textContent = data.fallback
       ? 'AI providers unavailable. Showing retrieved textbook passages instead.'
       : `Answer generated successfully using ${data.provider || 'AI'}.`;

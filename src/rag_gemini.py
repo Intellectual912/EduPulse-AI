@@ -1,4 +1,4 @@
-﻿
+
 import os
 import json
 import re
@@ -148,10 +148,7 @@ def query_aware_rerank_bonus(question, chunk_text):
 def load_resources():
     load_dotenv(BASE_DIR / ".env")
 
-    api_key = os.getenv("GEMINI_API_KEY", "").strip()
-
-    if not api_key:
-        raise RuntimeError("GEMINI_API_KEY is missing from .env")
+    # Textbook retrieval does not depend on an AI provider.
 
     if not CHUNKS_PATH.exists() or not EMBEDDINGS_PATH.exists():
         raise FileNotFoundError("RAG chunks or embeddings file is missing.")
@@ -168,14 +165,8 @@ def load_resources():
         raise ValueError("RAG embeddings must be a 2D matrix.")
 
     model = SentenceTransformer("all-MiniLM-L6-v2")
-    client = genai.Client(
-        api_key=api_key,
-        http_options=genai.types.HttpOptions(
-            timeout=60000
-        )
-    )
-
-    return chunks, embeddings, model, client
+    # Keep the fourth return value for compatibility with existing callers.
+    return chunks, embeddings, model, None
 
 
 def retrieve_chunks(question, chunks, embeddings, model,
@@ -293,17 +284,83 @@ def ask_question(question: str, subject: str = None, top_k: int = 5):
     context = "\n\n---\n\n".join(context_parts)
 
     prompt = f"""
-You are EduPulse AI, an academic learning assistant.
+You are EduPulse AI, an academic learning assistant for engineering students.
 
-Answer the student's question using ONLY the supplied textbook
-passages.
+CORE OBJECTIVE:
+Provide accurate, textbook-grounded academic answers that are easy to
+understand, technically correct, and suitable for university examinations.
 
-Rules:
-1. Explain in clear, student-friendly language.
-2. Do not invent facts that are absent from the passages.
-3. If the passages do not contain enough information, say so.
-4. Cite relevant sources using [Source: filename, PDF page: number].
-5. Do not claim that you consulted any source not supplied below.
+SOURCE RULES:
+1. Use ONLY the supplied textbook passages as factual evidence.
+2. Preserve the textbook's technical terminology, meaning, and important details.
+3. Never invent definitions, examples, protocols, formulas, figures, or facts.
+4. Never present unsupported information as textbook content.
+5. If the supplied passages are insufficient, explicitly identify what
+   cannot be established from the available material.
+6. Do not claim to have consulted any source that was not supplied.
+7. Preserve important qualifications and exceptions mentioned in the passages.
+
+ANSWER STRUCTURE:
+Adapt the structure to the actual question. Do not force every answer into
+the same template.
+
+- Definition questions:
+  Give a clear definition, followed by explanation and relevant characteristics.
+
+- Explanation questions:
+  Start with a brief introduction, explain the concept using meaningful
+  headings, and finish with a concise summary where useful.
+
+- Comparison questions:
+  Use a Markdown comparison table when sufficient evidence is available.
+  Choose clear comparison criteria and meaningful column headings.
+  Follow the table with the most important differences if necessary.
+
+- Advantages and disadvantages:
+  Separate advantages and disadvantages into clearly labelled sections.
+
+- Working or process questions:
+  Explain the steps in their logical order. Include a sequence or diagram
+  only when the supplied passages support it.
+
+- Exam-oriented questions:
+  Provide sufficient depth, relevant technical terminology, and a logical
+  academic structure. Do not invent a VTU mark allocation.
+
+FORMATTING RULES:
+1. Use valid GitHub-Flavored Markdown.
+2. Use one clear main heading when appropriate.
+3. Use descriptive subheadings to organize longer answers.
+4. Keep paragraphs focused and readable.
+5. Use numbered lists for ordered procedures and bullet lists for
+   unordered points.
+6. Use tables only when they improve understanding.
+7. Avoid unnecessarily wide tables and excessive columns.
+8. Do not put lengthy source citations inside every table cell.
+9. Place relevant citations at the end of the paragraph or section they
+   support. For tables, cite the relevant source after the table.
+10. Avoid unnecessary repetition, decorative symbols, and filler statements.
+
+CITATION RULES:
+1. Cite factual claims using exactly this format:
+   [Source: filename, PDF page: number]
+2. Use only filenames and page numbers present in the supplied passages.
+3. Cite the sources that actually support the explanation.
+4. Do not invent or alter page numbers.
+5. Avoid repeating identical citations unnecessarily.
+6. Do not add a separate bibliography containing unsupported sources.
+
+ACCURACY AND CONSISTENCY CHECK:
+Before finalizing the answer, verify that:
+- Numbers agree with the items, layers, stages, or steps listed.
+- Table entries do not contradict the explanation.
+- Technical terms are used consistently.
+- Every factual claim is supported by the supplied passages.
+- No unsupported detail has been added to make the answer appear complete.
+
+If the supplied textbook passages themselves contain conflicting information,
+do not silently resolve the conflict using outside knowledge. Explain the
+limitation clearly.
 
 TEXTBOOK CONTEXT:
 {context}
@@ -311,76 +368,98 @@ TEXTBOOK CONTEXT:
 STUDENT QUESTION:
 {question}
 
-Provide the answer:
+Write the answer directly. Do not describe these instructions.
 """
-    response = None
-
-    for attempt in range(2):
-        try:
-            response = client.models.generate_content(
-                model=os.getenv("GEMINI_MODEL", "gemini-3.8-flash"),
-                contents=prompt
-            )
-            break
-
-        except Exception as exc:
-            error_code = getattr(exc, "code", None)
-            is_timeout = "timeout" in type(exc).__name__.lower()
-
-            if (error_code in (503, 504) or is_timeout) and attempt == 0:
-                print("Gemini temporarily unavailable or timed out. Retrying once...")
-                time.sleep(2)
-                continue
-
-            print(f"Gemini generation failed: {exc}")
-            break
-
     answer = None
-    provider = "Gemini"
+    provider = "Groq"
     used_fallback = False
 
-    # Use Gemini response if successful.
-    if response is not None and response.text:
-        answer = response.text.strip()
+    # Primary provider: Groq
+    try:
+        groq_api_key = os.getenv("GROQ_API_KEY", "").strip()
 
-    # Otherwise, use Groq as backup.
-    else:
-        print("Trying Groq backup model...")
+        if not groq_api_key:
+            raise RuntimeError("GROQ_API_KEY is missing from .env")
+
+        groq_client = Groq(api_key=groq_api_key)
+
+        groq_response = groq_client.chat.completions.create(
+            model=os.getenv("GROQ_MODEL", "openai/gpt-oss-120b"),
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are EduPulse AI, an academic learning assistant. Answer using only the supplied textbook passages. Do not invent unsupported facts. Use clear Markdown formatting with headings, paragraphs, lists and tables where appropriate. Cite relevant sources using [Source: filename, PDF page: number]."
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ]
+        )
+
+        answer = groq_response.choices[0].message.content
+
+        if not answer or not answer.strip():
+            raise RuntimeError("Groq returned an empty response.")
+
+        answer = answer.strip()
+        print("Groq primary generation successful.")
+
+    except Exception as exc:
+        print(f"Groq primary generation failed: {exc}")
+
+    # Secondary provider: OpenRouter
+    if not answer:
+        print("Trying OpenRouter secondary model...")
 
         try:
-            groq_api_key = os.getenv("GROQ_API_KEY", "").strip()
+            openrouter_api_key = os.getenv("OPENROUTER_API_KEY", "").strip()
 
-            if not groq_api_key:
-                raise RuntimeError("GROQ_API_KEY is missing from .env")
+            if not openrouter_api_key:
+                raise RuntimeError("OPENROUTER_API_KEY is missing from .env")
 
-            groq_client = Groq(api_key=groq_api_key)
-
-            groq_response = groq_client.chat.completions.create(
-                model=os.getenv(
-                    "GROQ_MODEL",
-                    "openai/gpt-oss-120b"
-                ),
-                messages=[
+            request_data = json.dumps({
+                "model": os.getenv("OPENROUTER_MODEL", "openrouter/free"),
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": "You are EduPulse AI, an academic learning assistant. Answer using only the supplied textbook passages. Do not invent unsupported facts. Use clear Markdown formatting with headings, paragraphs, lists and tables where appropriate. Cite relevant sources using [Source: filename, PDF page: number]."
+                    },
                     {
                         "role": "user",
                         "content": prompt
                     }
-                ]
+                ],
+                "max_tokens": 2000
+            }).encode("utf-8")
+
+            request = urllib.request.Request(
+                "https://openrouter.ai/api/v1/chat/completions",
+                data=request_data,
+                headers={
+                    "Authorization": f"Bearer {openrouter_api_key}",
+                    "Content-Type": "application/json"
+                },
+                method="POST"
             )
 
-            answer = groq_response.choices[0].message.content
+            with urllib.request.urlopen(request, timeout=60) as response:
+                result = json.loads(response.read().decode("utf-8"))
 
-            if not answer:
-                raise RuntimeError("Groq returned an empty response.")
+            answer = result["choices"][0]["message"].get("content")
+
+            if not answer or not answer.strip():
+                raise RuntimeError("OpenRouter returned an empty response.")
 
             answer = answer.strip()
-            provider = "Groq (Backup)"
+            provider = "OpenRouter (Backup)"
             used_fallback = True
+            print("OpenRouter secondary generation successful.")
 
         except Exception as exc:
-            print(f"Groq generation failed: {exc}")
+            print(f"OpenRouter generation failed: {exc}")
 
-    # Use retrieved passages only if both AI providers fail.
+    # Last resort: return retrieved textbook passages.
     if not answer:
         used_fallback = True
         provider = "Textbook Retrieval Only"
@@ -388,12 +467,23 @@ Provide the answer:
         answer = (
             "AI answer generation is temporarily unavailable. "
             "However, EduPulse AI successfully retrieved these "
-            "relevant textbook passages:\n\n"
+            "relevant textbook passages:\\n\\n"
             + context
         )
 
+    answer = answer.strip()
+    print("UNICODE BEFORE:", repr(answer[answer.find("PDF page"):answer.find("PDF page")+35]))
+    print("NARROW SPACE MATCHES:", answer.count('\u00e2\u0080\u00af'))
+
+    answer = answer.replace('\u00e2\u0080\u00af', '\u202f')
+    answer = answer.replace('\u00e2\u0080\u0091', '\u2011')
+    answer = answer.replace('\u00e2\u0080\u0093', '\u2013')
+
+    print("UNICODE AFTER:", repr(answer[answer.find("PDF page"):answer.find("PDF page")+35]))
+    print("REMAINING MATCHES:", answer.count('\u00e2\u0080\u00af'))
+
     return {
-        "answer": answer.strip(),
+        "answer": answer,
         "sources": sources,
         "fallback": used_fallback,
         "provider": provider

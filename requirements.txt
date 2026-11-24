@@ -1,34 +1,28 @@
-# EduPulse AI — Milestone 1 dependencies
-#
-# Versions pinned to the environment in which the pipeline and notebook were
-# executed and verified on 2026-10-20 (Python 3.13.16, Debian 13).
-# Milestone 1 only needs the data stack; modelling libraries arrive in
-# Milestone 2 (see the commented block at the bottom).
+﻿# EduPulse AI — Tested Python dependencies
+# Environment: Python 3.12.10, Windows 64-bit
+# Versions reflect the working development environment.
 
-pandas==2.2.3
+# Backend
+fastapi==0.151.0
+uvicorn==0.54.0
+pydantic==2.14.1
+
+# Data processing and machine learning
 numpy==2.3.5
-scikit-learn==1.6.1      # imported for future use; Milestone 1 does not fit any model
-matplotlib==3.10.9
-seaborn==0.13.2
-jupyter==1.1.1
-nbconvert==7.17.1
-nbformat==5.11.1
-ipykernel==6.31.0
-pytest==9.0.3
+pandas==2.2.3
+scikit-learn==1.6.1
+xgboost==3.4.1
+torch==2.15.0
+joblib==1.6.0
 
-# --- Milestone 2 (10 Nov 2026) — model training ------------------------------
-# Not installed for Milestone 1; versions are deliberately NOT pinned here
-# because they were not resolved/tested in this milestone. Pin them at the
-# moment you install and test them.
-#   xgboost
-#   imbalanced-learn
-#   shap
-#
-# --- Milestone 3 (1 Dec 2026) — LLM coach + RAG ------------------------------
-#   sentence-transformers
-#   faiss-cpu
-#   langchain
-#
-# --- Milestone 4 (18 Dec 2026) — dashboards ---------------------------------
-#   streamlit
-#   plotly
+# RAG and LLM providers
+sentence-transformers==6.2.0
+google-genai==3.5.0
+groq==1.7.0
+python-dotenv==1.2.4
+
+# PDF extraction and OCR
+PyMuPDF==2.0
+pypdf==6.21.1
+pytesseract==0.3.13
+Pillow==13.0.0
