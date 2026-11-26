@@ -6,8 +6,9 @@ from src.cn_diagnostic_service import CNDiagnosticService
 def test_service_loads_questions_and_concepts():
     service = CNDiagnosticService()
 
-    assert len(service.get_questions()) == 21
-    assert len(service.get_mastery_report()) == 7
+    assert len(service.get_questions()) == 53
+    assert len(service.get_mastery_report()) == 17
+    assert len(service.get_questions(module=1)) == 14
 
 
 def test_questions_do_not_reveal_correct_answers():
@@ -65,3 +66,16 @@ def test_duplicate_question_attempt_is_rejected():
 
     with pytest.raises(ValueError, match="already been attempted"):
         service.submit_answer("CN_Q001", "B")
+
+def test_module_2_has_32_questions_and_all_coverage_questions():
+    from src.cn_diagnostic_service import CNDiagnosticService
+
+    service = CNDiagnosticService()
+    questions = service.get_questions(module=2)
+    question_ids = [question["question_id"] for question in questions]
+
+    assert len(questions) == 32
+    assert question_ids[0] == "CN_Q022"
+    assert question_ids[-1] == "CN_Q053"
+    assert {"CN_Q050", "CN_Q051", "CN_Q052", "CN_Q053"}.issubset(set(question_ids))
+
